@@ -1,0 +1,16 @@
+######################
+# This playbook creates certificates using certbot. It also takes care of certificate renewal.
+# This script supports dns-route53 validation by default
+######################
+
+---
+  - name: Lookup all the domains in scope
+    debug:
+      msg: "Running certbot for following domains: {{ domain_list }}"
+
+  - name: Check certificate status for all the domains
+    include_tasks: "../tasks/create_cert.yml"
+    vars:
+      domain_name: "{{ item }}"
+    with_items:
+      - "{{ domain_list }}"
