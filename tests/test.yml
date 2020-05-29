@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  
+  # Create certs
+    - name: Generate new Certs
+      include_role:
+        name: Certbot_role_name
+      vars:
+        domain_list: ['abc.com']
