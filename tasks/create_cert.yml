@@ -1,0 +1,30 @@
+---
+
+- name: "Running check for domain - {{ domain_name }}"
+  debug:
+    msg: "Running certificate check for domain {{ domain_name }}"
+
+- name: "Check if certificate already exists for domain - {{ domain_name }}"
+  stat:
+    path: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+  register: letsencrypt_cert
+
+- name: "Debug message"
+  debug:
+    msg: "{% if  letsencrypt_cert.stat.exists  == True %} !!! Certificate already exists for {{ domain_name }}, no need to create new certificate. Do check if certificate needs renewal !!! {% else %} !!! Creating new certificate for {{ domain_name }} as it doesn't exist !!! {% endif %}"
+
+- name: "Create cert for {{ domain_name }}"
+  shell: |
+    certbot certonly -n --dns-route53 -d "{{ domain_name }}" --debug
+  register: new_cert
+  when:
+    - letsencrypt_cert.stat.exists == False
+  environment:
+    AWS_ACCESS_KEY_ID: "XXXXXXXXXXXXXXXXXXXX"
+    AWS_SECRET_ACCESS_KEY: "XXXXXXXXXXXXXXXXXXXXX"
+
+- name: "Debug cert generated for {{ domain_name }}"
+  debug:
+    var: new_cert
+  when:
+    - new_cert is not skipped
